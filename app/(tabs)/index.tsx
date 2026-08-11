@@ -1,21 +1,73 @@
-import { Pressable, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { router } from "expo-router";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
+import { StatTile } from "@/components/ui/stat-tile";
+
+const TODAYS_MEALS: { label: string; status: MealStatus }[] = [
+  { label: "Breakfast", status: "served" },
+  { label: "Lunch", status: "served" },
+  { label: "Dinner", status: "pending" },
+];
+
+const MONTHLY_SUMMARY = {
+  totalMeals: "148",
+  totalBazar: "৳12,450",
+  mealRate: "৳58.30",
+};
+
+const QUICK_ACTIONS = ["Add Meal", "Add Bazar", "Members", "Deposits"];
 
 export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">MessMate</ThemedText>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <ThemedText style={styles.greeting}>Good morning 👋</ThemedText>
+          <ThemedText type="title">MessMate</ThemedText>
+        </View>
 
-      <ThemedText style={styles.subtitle}>
-        Manage your mess meals easily
-      </ThemedText>
+        <View style={styles.section}>
+          <ThemedText type="subtitle" style={styles.sectionTitle}>
+            Today&apos;s Meals
+          </ThemedText>
+          <Card>
+            {TODAYS_MEALS.map((meal) => (
+              <MealStatusRow key={meal.label} label={meal.label} status={meal.status} />
+            ))}
+          </Card>
+        </View>
 
-      <Pressable style={styles.button} onPress={() => router.push("/login")}>
-        <ThemedText style={styles.buttonText}>Get Started</ThemedText>
-      </Pressable>
+        <View style={styles.section}>
+          <ThemedText type="subtitle" style={styles.sectionTitle}>
+            Monthly Summary
+          </ThemedText>
+          <Card style={styles.summaryCard}>
+            <StatTile label="Total Meals" value={MONTHLY_SUMMARY.totalMeals} />
+            <StatTile label="Total Bazar" value={MONTHLY_SUMMARY.totalBazar} />
+            <StatTile label="Meal Rate" value={MONTHLY_SUMMARY.mealRate} />
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <ThemedText type="subtitle" style={styles.sectionTitle}>
+            Quick Actions
+          </ThemedText>
+          <View style={styles.actionsGrid}>
+            {QUICK_ACTIONS.map((action) => (
+              <View key={action} style={styles.actionItem}>
+                <Button title={action} onPress={() => {}} />
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -23,25 +75,33 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
   },
-
-  subtitle: {
-    marginTop: 12,
-    textAlign: "center",
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+    gap: 24,
   },
-
-  button: {
-    marginTop: 32,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    backgroundColor: "#2563EB",
+  header: {
+    gap: 4,
   },
-
-  buttonText: {
-    color: "#FFFFFF",
+  greeting: {
+    fontSize: 16,
+  },
+  section: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+  },
+  summaryCard: {
+    flexDirection: "row",
+  },
+  actionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  actionItem: {
+    width: "47%",
   },
 });
