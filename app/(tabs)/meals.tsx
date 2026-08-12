@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -7,6 +7,8 @@ import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
+import { getMeals } from "@/services/meals-api";
+import type { Meal } from "@/types/meal";
 
 export interface DayMeals {
   date: string;
@@ -26,15 +28,21 @@ const INITIAL_TODAYS_MEALS: DayMeals = {
   dinner: "pending",
 };
 
-const RECENT_MEALS: DayMeals[] = [
-  { date: "Aug 10", breakfast: "served", lunch: "served", dinner: "served" },
-  { date: "Aug 9", breakfast: "served", lunch: "pending", dinner: "served" },
-  { date: "Aug 8", breakfast: "served", lunch: "served", dinner: "served" },
-  { date: "Aug 7", breakfast: "pending", lunch: "served", dinner: "served" },
-];
-
 function toggleStatus(status: MealStatus): MealStatus {
   return status === "served" ? "pending" : "served";
+}
+
+function toMealStatus(isServed: boolean): MealStatus {
+  return isServed ? "served" : "pending";
+}
+
+function toDayMeals(meal: Meal): DayMeals {
+  return {
+    date: meal.date,
+    breakfast: toMealStatus(meal.breakfast),
+    lunch: toMealStatus(meal.lunch),
+    dinner: toMealStatus(meal.dinner),
+  };
 }
 
 interface DayMealsCardProps {
@@ -67,6 +75,7 @@ function DayMealsCard({ day, onTogglePress }: DayMealsCardProps) {
 
 export default function MealsScreen() {
   const [todaysMeals, setTodaysMeals] = useState<DayMeals>(INITIAL_TODAYS_MEALS);
+  const [meals, setMeals] = useState<Meal[]>([]);
 
   const handleToggleToday = (slot: MealSlot) => {
     setTodaysMeals((current) => ({
@@ -74,6 +83,21 @@ export default function MealsScreen() {
       [slot]: toggleStatus(current[slot]),
     }));
   };
+
+  const loadMeals = async () => {
+    try {
+      const data = await getMeals();
+      setMeals(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadMeals();
+    }, [])
+  );
 
   return (
     <ThemedView style={styles.container}>
@@ -100,8 +124,8 @@ export default function MealsScreen() {
             Recent Meals
           </ThemedText>
           <View style={styles.recentList}>
-            {RECENT_MEALS.map((day) => (
-              <DayMealsCard key={day.date} day={day} />
+            {meals.map((meal) => (
+              <DayMealsCard key={meal.id} day={toDayMeals(meal)} />
             ))}
           </View>
         </View>

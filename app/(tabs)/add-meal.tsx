@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
 import type { MealSlot } from "@/app/(tabs)/meals";
+import { createMeal } from "@/services/meals-api";
 
 const TODAY_LABEL = "Today, Aug 11";
 
@@ -27,10 +28,6 @@ const INITIAL_FORM: MealFormData = {
 
 function toStatus(served: boolean): MealStatus {
   return served ? "served" : "pending";
-}
-
-function simulateSave(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
 export default function AddMealScreen() {
@@ -62,9 +59,12 @@ export default function AddMealScreen() {
     setIsSubmitting(true);
 
     try {
-      await simulateSave();
-      console.log("Meal saved:", form);
+      const createdMeal = await createMeal(form);
+      console.log("Meal created:", createdMeal);
       router.back();
+    } catch (error) {
+      console.error("Failed to create meal:", error);
+      setError("Failed to save meal. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

@@ -6,3 +6,10 @@ export type Meal = {
   dinner: boolean;
   createdAt: string;
 };
+
+export type MealCreate = {
+  date: string;
+  breakfast: boolean;
+  lunch: boolean;
+  dinner: boolean;
+};
