@@ -36,6 +36,12 @@ export default function TabLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="edit-meal"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

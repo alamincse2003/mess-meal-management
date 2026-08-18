@@ -1,13 +1,13 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
-import { getMeals } from "@/services/meals-api";
+import { deleteMeal, getMeals } from "@/services/meals-api";
 import type { Meal } from "@/types/meal";
 
 export interface DayMeals {
@@ -48,12 +48,37 @@ function toDayMeals(meal: Meal): DayMeals {
 interface DayMealsCardProps {
   day: DayMeals;
   onTogglePress?: (slot: MealSlot) => void;
+  onEditPress?: () => void;
+  onDeletePress?: () => void;
+  isDeleting?: boolean;
 }
 
-function DayMealsCard({ day, onTogglePress }: DayMealsCardProps) {
+function DayMealsCard({
+  day,
+  onTogglePress,
+  onEditPress,
+  onDeletePress,
+  isDeleting,
+}: DayMealsCardProps) {
   return (
     <Card style={styles.dayCard}>
-      <ThemedText style={styles.dayLabel}>{day.date}</ThemedText>
+      <View style={styles.dayCardHeader}>
+        <ThemedText style={styles.dayLabel}>{day.date}</ThemedText>
+        <View style={styles.dayCardActions}>
+          {onEditPress ? (
+            <Pressable onPress={onEditPress} disabled={isDeleting}>
+              <ThemedText style={styles.editText}>Edit</ThemedText>
+            </Pressable>
+          ) : null}
+          {onDeletePress ? (
+            <Pressable onPress={onDeletePress} disabled={isDeleting}>
+              <ThemedText style={styles.deleteText}>
+                {isDeleting ? "Deleting..." : "Delete"}
+              </ThemedText>
+            </Pressable>
+          ) : null}
+        </View>
+      </View>
       <MealStatusRow
         label="Breakfast"
         status={day.breakfast}
@@ -76,6 +101,9 @@ function DayMealsCard({ day, onTogglePress }: DayMealsCardProps) {
 export default function MealsScreen() {
   const [todaysMeals, setTodaysMeals] = useState<DayMeals>(INITIAL_TODAYS_MEALS);
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [deletingMealId, setDeletingMealId] = useState<number | null>(null);
 
   const handleToggleToday = (slot: MealSlot) => {
     setTodaysMeals((current) => ({
@@ -85,11 +113,17 @@ export default function MealsScreen() {
   };
 
   const loadMeals = async () => {
+    setError("");
+    setIsLoading(true);
+
     try {
       const data = await getMeals();
       setMeals(data);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load meals. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,6 +132,19 @@ export default function MealsScreen() {
       loadMeals();
     }, [])
   );
+
+  const handleDeleteMeal = async (mealId: number) => {
+    setDeletingMealId(mealId);
+
+    try {
+      await deleteMeal(mealId);
+      setMeals((current) => current.filter((meal) => meal.id !== mealId));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeletingMealId(null);
+    }
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -123,11 +170,36 @@ export default function MealsScreen() {
           <ThemedText type="subtitle" style={styles.sectionTitle}>
             Recent Meals
           </ThemedText>
-          <View style={styles.recentList}>
-            {meals.map((meal) => (
-              <DayMealsCard key={meal.id} day={toDayMeals(meal)} />
-            ))}
-          </View>
+          {isLoading ? (
+            <ThemedText>Loading meals...</ThemedText>
+          ) : error ? (
+            <ThemedText style={styles.error}>{error}</ThemedText>
+          ) : meals.length === 0 ? (
+            <ThemedText>No meals found.</ThemedText>
+          ) : (
+            <View style={styles.recentList}>
+              {meals.map((meal) => (
+                <DayMealsCard
+                  key={meal.id}
+                  day={toDayMeals(meal)}
+                  onEditPress={() =>
+                    router.push({
+                      pathname: "/edit-meal",
+                      params: {
+                        id: String(meal.id),
+                        date: meal.date,
+                        breakfast: String(meal.breakfast),
+                        lunch: String(meal.lunch),
+                        dinner: String(meal.dinner),
+                      },
+                    })
+                  }
+                  onDeletePress={() => handleDeleteMeal(meal.id)}
+                  isDeleting={deletingMealId === meal.id}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
     </ThemedView>
@@ -161,9 +233,29 @@ const styles = StyleSheet.create({
   dayCard: {
     gap: 2,
   },
+  dayCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  dayCardActions: {
+    flexDirection: "row",
+    gap: 16,
+  },
   dayLabel: {
     fontSize: 15,
     fontWeight: "600",
-    marginBottom: 4,
+  },
+  editText: {
+    color: "#2563EB",
+    fontSize: 14,
+  },
+  deleteText: {
+    color: "#DC2626",
+    fontSize: 14,
+  },
+  error: {
+    color: "#DC2626",
   },
 });
