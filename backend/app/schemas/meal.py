@@ -16,3 +16,4 @@ class MealResponse(BaseModel):
     breakfast: bool
     lunch: bool
     dinner: bool
+    user_id: int
