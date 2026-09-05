@@ -13,3 +13,6 @@ class User(Base):
     password_hash = Column(String, nullable=True)
 
     meals = relationship("Meal", back_populates="user")
+    bazar_entries = relationship("BazarEntry", back_populates="user")
+    expenses = relationship("Expense", back_populates="user")
+    deposits = relationship("Deposit", back_populates="user")

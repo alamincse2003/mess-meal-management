@@ -4,7 +4,7 @@ export type Meal = {
   breakfast: boolean;
   lunch: boolean;
   dinner: boolean;
-  createdAt: string;
+  user_id: number;
 };
 
 export type MealCreate = {
@@ -12,4 +12,8 @@ export type MealCreate = {
   breakfast: boolean;
   lunch: boolean;
   dinner: boolean;
+};
+
+export type MealSummary = {
+  total_meal_slots: number;
 };

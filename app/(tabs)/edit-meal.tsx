@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
 import type { MealSlot } from "@/app/(tabs)/meals";
 import { updateMeal } from "@/services/meals-api";
+import { formatDisplayDate } from "@/utils/date";
 
 type MealFormData = {
   date: string;
@@ -84,7 +85,7 @@ export default function EditMealScreen() {
       >
         <View style={styles.header}>
           <ThemedText type="title">Edit Meal</ThemedText>
-          <ThemedText style={styles.date}>{form.date}</ThemedText>
+          <ThemedText style={styles.date}>{formatDisplayDate(form.date)}</ThemedText>
         </View>
 
         <Card style={styles.card}>

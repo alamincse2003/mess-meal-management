@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 
@@ -6,25 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { login } from "@/services/auth-api";
+import { saveAccessToken } from "@/services/auth-storage";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginScreen() {
-  const router = useRouter();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = () => {
-    setEmailError("");
-    setPasswordError("");
-
-    if (!email.trim()) {
-      setEmailError("Email is required");
+  const handleLogin = async () => {
+    if (isSubmitting) {
       return;
     }
 
-    if (!email.includes("@")) {
-      setEmailError("Please enter a valid email");
+    setEmailError("");
+    setPasswordError("");
+    setFormError("");
+
+    if (!email.trim()) {
+      setEmailError("Email is required");
       return;
     }
 
@@ -33,17 +37,19 @@ export default function LoginScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
-      return;
+    setIsSubmitting(true);
+
+    try {
+      const response = await login({ email, password });
+      await saveAccessToken(response.access_token);
+      console.log("Login succeeded, token type:", response.token_type);
+      await signIn();
+    } catch (error) {
+      console.error("Login failed:", error);
+      setFormError("Invalid email or password");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    console.log("Login valid:", {
-      email,
-      password,
-    });
-
-    router.replace("/");
   };
 
   return (
@@ -77,7 +83,15 @@ export default function LoginScreen() {
           secureTextEntry
         />
 
-        <Button title="Login" onPress={handleLogin} />
+        {formError ? (
+          <ThemedText style={styles.formError}>{formError}</ThemedText>
+        ) : null}
+
+        <Button
+          title={isSubmitting ? "Logging in..." : "Login"}
+          onPress={handleLogin}
+          disabled={isSubmitting}
+        />
       </KeyboardAvoidingView>
     </ThemedView>
   );
@@ -98,5 +112,10 @@ const styles = StyleSheet.create({
   subtitle: {
     marginTop: 8,
     marginBottom: 32,
+  },
+
+  formError: {
+    color: "#DC2626",
+    marginBottom: 16,
   },
 });

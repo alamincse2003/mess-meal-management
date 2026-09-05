@@ -1,8 +1,15 @@
 import { apiClient } from "@/services/api-client";
-import type { Meal, MealCreate } from "@/types/meal";
+import type { Meal, MealCreate, MealSummary } from "@/types/meal";
 
 export async function getMeals(): Promise<Meal[]> {
   const response = await apiClient.get<Meal[]>("/meals");
+  return response.data;
+}
+
+export async function getMealSummary(month: string): Promise<MealSummary> {
+  const response = await apiClient.get<MealSummary>("/meals/summary", {
+    params: { month },
+  });
   return response.data;
 }
 

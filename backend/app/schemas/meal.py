@@ -17,3 +17,7 @@ class MealResponse(BaseModel):
     lunch: bool
     dinner: bool
     user_id: int
+
+
+class MealSummaryResponse(BaseModel):
+    total_meal_slots: int

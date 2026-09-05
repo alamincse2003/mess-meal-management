@@ -3,6 +3,9 @@ from logging.config import fileConfig
 from alembic import context
 
 from app.database import Base, engine
+from app.models import bazar_entry as bazar_entry_model  # noqa: F401  (registers BazarEntry on Base.metadata)
+from app.models import deposit as deposit_model  # noqa: F401  (registers Deposit on Base.metadata)
+from app.models import expense as expense_model  # noqa: F401  (registers Expense on Base.metadata)
 from app.models import meal as meal_model  # noqa: F401  (registers Meal on Base.metadata)
 from app.models import user as user_model  # noqa: F401  (registers User on Base.metadata)
 

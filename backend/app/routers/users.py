@@ -3,6 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.bazar_entry import BazarEntry
 from app.models.meal import Meal  # noqa: F401  (registers Meal for User.meals relationship resolution)
 from app.models.user import User
 from app.schemas.user import TokenResponse, UserCreate, UserLogin, UserResponse
@@ -49,7 +50,10 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=list[UserResponse])
-def list_users(db: Session = Depends(get_db)):
+def list_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return db.query(User).all()
 
 
@@ -59,7 +63,11 @@ def get_current_user_profile(current_user: User = Depends(get_current_user)):
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     existing_user = db.query(User).filter(User.id == user_id).first()
 
     if existing_user is None:
@@ -72,6 +80,7 @@ def update_user(
     user_id: int,
     user: UserCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     existing_user = (
         db.query(User)
@@ -83,6 +92,12 @@ def update_user(
         raise HTTPException(
             status_code=404,
             detail="User not found",
+        )
+
+    if existing_user.id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to update this user",
         )
 
     existing_user.name = user.name
@@ -115,6 +130,17 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=409,
             detail="Cannot delete user with existing meals",
+        )
+
+    has_bazar_entries = (
+        db.query(BazarEntry).filter(BazarEntry.user_id == user_id).first()
+        is not None
+    )
+
+    if has_bazar_entries:
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete user with existing bazar entries",
         )
 
     deleted_user = UserResponse.model_validate(existing_user)

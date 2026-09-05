@@ -9,8 +9,7 @@ import { Card } from "@/components/ui/card";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
 import type { MealSlot } from "@/app/(tabs)/meals";
 import { createMeal } from "@/services/meals-api";
-
-const TODAY_LABEL = "Today, Aug 11";
+import { formatDisplayDate, getTodayISO } from "@/utils/date";
 
 type MealFormData = {
   date: string;
@@ -20,7 +19,7 @@ type MealFormData = {
 };
 
 const INITIAL_FORM: MealFormData = {
-  date: TODAY_LABEL,
+  date: getTodayISO(),
   breakfast: false,
   lunch: false,
   dinner: false,
@@ -78,7 +77,7 @@ export default function AddMealScreen() {
       >
         <View style={styles.header}>
           <ThemedText type="title">Add Meal</ThemedText>
-          <ThemedText style={styles.date}>{form.date}</ThemedText>
+          <ThemedText style={styles.date}>{formatDisplayDate(form.date)}</ThemedText>
         </View>
 
         <Card style={styles.card}>

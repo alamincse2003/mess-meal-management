@@ -36,6 +36,33 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="bazar"
+        options={{
+          title: "Bazar",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="cart.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="members"
+        options={{
+          title: "Members",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.2.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="expenses"
+        options={{
+          title: "Expenses",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="creditcard.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="add-meal"
         options={{
           href: null,
@@ -43,6 +70,66 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="edit-meal"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="add-bazar"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="edit-bazar"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="add-expense"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="edit-expense"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="account"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="stats"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="deposits"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="add-deposit"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="edit-deposit"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="balance"
         options={{
           href: null,
         }}

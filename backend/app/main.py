@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import meals, users
+from app.routers import balance, bazar, deposits, expenses, meals, users
 
 app = FastAPI()
 
@@ -14,6 +14,10 @@ app.add_middleware(
 
 app.include_router(meals.router, prefix="/meals")
 app.include_router(users.router, prefix="/users")
+app.include_router(bazar.router, prefix="/bazar")
+app.include_router(expenses.router, prefix="/expenses")
+app.include_router(deposits.router, prefix="/deposits")
+app.include_router(balance.router, prefix="/balance")
 
 
 @app.get("/")
