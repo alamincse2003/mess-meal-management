@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { Colors, Radius, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { login } from "@/services/auth-api";
 import { saveAccessToken } from "@/services/auth-storage";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginScreen() {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -58,10 +62,16 @@ export default function LoginScreen() {
         style={styles.keyboardContainer}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ThemedText type="title">Login</ThemedText>
+        <View style={[styles.logoMark, { backgroundColor: palette.tint }]}>
+          <ThemedText style={styles.logoMarkText}>M</ThemedText>
+        </View>
 
-        <ThemedText style={styles.subtitle}>
-          Welcome back to MessMate
+        <ThemedText type="title" style={styles.title}>
+          Welcome back
+        </ThemedText>
+
+        <ThemedText style={[styles.subtitle, { color: palette.textMuted }]}>
+          Log in to continue to MessMate
         </ThemedText>
 
         <Input
@@ -84,7 +94,9 @@ export default function LoginScreen() {
         />
 
         {formError ? (
-          <ThemedText style={styles.formError}>{formError}</ThemedText>
+          <ThemedText style={[styles.formError, { color: palette.danger }]}>
+            {formError}
+          </ThemedText>
         ) : null}
 
         <Button
@@ -101,7 +113,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: Spacing.xxl,
   },
 
   keyboardContainer: {
@@ -109,13 +121,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  logoMark: {
+    width: 56,
+    height: 56,
+    borderRadius: Radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.xl,
+  },
+
+  logoMarkText: {
+    color: "#FFFFFF",
+    fontSize: 26,
+    fontWeight: "800",
+  },
+
+  title: {
+    marginBottom: 4,
+  },
+
   subtitle: {
-    marginTop: 8,
-    marginBottom: 32,
+    fontSize: 15,
+    marginBottom: Spacing.xxl,
   },
 
   formError: {
-    color: "#DC2626",
-    marginBottom: 16,
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: Spacing.lg,
   },
 });

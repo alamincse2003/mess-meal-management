@@ -1,15 +1,20 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { Colors, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { createExpense } from "@/services/expenses-api";
 import { formatDisplayDate, getTodayISO } from "@/utils/date";
 
 export default function AddExpenseScreen() {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
   const [date] = useState(getTodayISO());
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -61,10 +66,7 @@ export default function AddExpenseScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Add Expense</ThemedText>
-          <ThemedText style={styles.date}>{formatDisplayDate(date)}</ThemedText>
-        </View>
+        <ScreenHeader title="Add Expense" subtitle={formatDisplayDate(date)} />
 
         <Input
           label="Category"
@@ -88,7 +90,11 @@ export default function AddExpenseScreen() {
           onChangeText={setDescription}
         />
 
-        {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+        {error ? (
+          <ThemedText style={[styles.error, { color: palette.danger }]}>
+            {error}
+          </ThemedText>
+        ) : null}
 
         <Button
           title={isSubmitting ? "Saving..." : "Save Expense"}
@@ -105,18 +111,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 16,
-  },
-  header: {
-    gap: 4,
-    marginBottom: 8,
-  },
-  date: {
-    fontSize: 16,
+    gap: Spacing.lg,
   },
   error: {
-    color: "#DC2626",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });

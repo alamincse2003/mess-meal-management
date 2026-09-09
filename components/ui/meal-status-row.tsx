@@ -1,6 +1,8 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { Colors, Radius } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export type MealStatus = "served" | "pending";
 
@@ -11,16 +13,28 @@ export interface MealStatusRowProps {
 }
 
 export function MealStatusRow({ label, status, onPress }: MealStatusRowProps) {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
   const isServed = status === "served";
 
   const content = (
     <View style={styles.row}>
       <ThemedText style={styles.label}>{label}</ThemedText>
       <View
-        style={[styles.badge, isServed ? styles.badgeServed : styles.badgePending]}
+        style={[
+          styles.badge,
+          {
+            backgroundColor: isServed
+              ? palette.successSurface
+              : palette.warningSurface,
+          },
+        ]}
       >
         <ThemedText
-          style={[styles.badgeText, isServed ? styles.badgeTextServed : styles.badgeTextPending]}
+          style={[
+            styles.badgeText,
+            { color: isServed ? palette.success : palette.warning },
+          ]}
         >
           {isServed ? "Served" : "Pending"}
         </ThemedText>
@@ -43,27 +57,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   label: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: "500",
   },
   badge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 999,
-  },
-  badgeServed: {
-    backgroundColor: "#DCFCE7",
-  },
-  badgePending: {
-    backgroundColor: "#FEF3C7",
+    borderRadius: Radius.full,
   },
   badgeText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  badgeTextServed: {
-    color: "#15803D",
-  },
-  badgeTextPending: {
-    color: "#B45309",
+    fontSize: 12,
+    fontWeight: "700",
   },
 });

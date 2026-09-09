@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorView } from "@/components/ui/error-view";
 import { LoadingView } from "@/components/ui/loading-view";
+import { ScreenHeader, SectionLabel } from "@/components/ui/screen-header";
+import { Colors, Spacing } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { deleteDeposit, getDeposits } from "@/services/deposits-api";
 import type { Deposit } from "@/types/deposit";
 import { confirmDelete } from "@/utils/confirm";
@@ -33,6 +36,9 @@ function DepositCard({
   onDeletePress,
   isDeleting,
 }: DepositCardProps) {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
+
   return (
     <Card style={styles.entryCard}>
       <View style={styles.entryHeader}>
@@ -42,18 +48,20 @@ function DepositCard({
         {isOwn ? (
           <View style={styles.entryActions}>
             <Pressable onPress={onEditPress} disabled={isDeleting}>
-              <ThemedText style={styles.editText}>Edit</ThemedText>
+              <ThemedText style={[styles.editText, { color: palette.tint }]}>
+                Edit
+              </ThemedText>
             </Pressable>
             <Pressable onPress={onDeletePress} disabled={isDeleting}>
-              <ThemedText style={styles.deleteText}>
+              <ThemedText style={[styles.deleteText, { color: palette.danger }]}>
                 {isDeleting ? "Deleting..." : "Delete"}
               </ThemedText>
             </Pressable>
           </View>
         ) : null}
       </View>
-      <ThemedText style={styles.entryAmount}>
-        {formatAmount(deposit.amount)}
+      <ThemedText style={[styles.entryAmount, { color: palette.success }]}>
+        +{formatAmount(deposit.amount)}
       </ThemedText>
     </Card>
   );
@@ -115,10 +123,7 @@ export default function DepositsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Deposits</ThemedText>
-          <ThemedText style={styles.month}>{getCurrentMonthLabel()}</ThemedText>
-        </View>
+        <ScreenHeader title="Deposits" subtitle={getCurrentMonthLabel()} />
 
         <Button
           title="Add Deposit"
@@ -126,9 +131,7 @@ export default function DepositsScreen() {
         />
 
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            All Deposits
-          </ThemedText>
+          <SectionLabel>All Deposits</SectionLabel>
           {isLoading ? (
             <LoadingView label="Loading deposits..." />
           ) : error ? (
@@ -178,28 +181,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 24,
-  },
-  header: {
-    gap: 4,
-  },
-  month: {
-    fontSize: 16,
+    gap: Spacing.xxl,
   },
   section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
+    gap: Spacing.md,
   },
   total: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   entryList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   entryCard: {
     gap: 4,
@@ -222,14 +216,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   editText: {
-    color: "#2563EB",
     fontSize: 14,
+    fontWeight: "600",
   },
   deleteText: {
-    color: "#DC2626",
     fontSize: 14,
-  },
-  error: {
-    color: "#DC2626",
+    fontWeight: "600",
   },
 });

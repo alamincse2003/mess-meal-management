@@ -7,7 +7,10 @@ import { ThemedView } from "@/components/themed-view";
 import { Card } from "@/components/ui/card";
 import { ErrorView } from "@/components/ui/error-view";
 import { LoadingView } from "@/components/ui/loading-view";
+import { ScreenHeader, SectionLabel } from "@/components/ui/screen-header";
 import { StatTile } from "@/components/ui/stat-tile";
+import { Colors, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { getMeals } from "@/services/meals-api";
 import type { Meal } from "@/types/meal";
 import { formatDisplayDate, getCurrentMonthLabel, isInCurrentMonth } from "@/utils/date";
@@ -17,6 +20,8 @@ function countServed(meals: Meal[], slot: "breakfast" | "lunch" | "dinner") {
 }
 
 export default function StatsScreen() {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
   const [meals, setMeals] = useState<Meal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,10 +63,7 @@ export default function StatsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Monthly Stats</ThemedText>
-          <ThemedText style={styles.month}>{getCurrentMonthLabel()}</ThemedText>
-        </View>
+        <ScreenHeader title="Monthly Stats" subtitle={getCurrentMonthLabel()} />
 
         {isLoading ? (
           <LoadingView label="Loading stats..." />
@@ -70,14 +72,13 @@ export default function StatsScreen() {
         ) : (
           <>
             <View style={styles.section}>
-              <ThemedText type="subtitle" style={styles.sectionTitle}>
-                Meals This Month
-              </ThemedText>
+              <SectionLabel>Meals This Month</SectionLabel>
               <Card style={styles.summaryCard}>
                 <StatTile label="Breakfast" value={String(breakfastCount)} />
                 <StatTile label="Lunch" value={String(lunchCount)} />
                 <StatTile label="Dinner" value={String(dinnerCount)} />
               </Card>
+              <View style={{ height: Spacing.md }} />
               <Card style={styles.summaryCard}>
                 <StatTile label="Served" value={String(totalSlotsServed)} />
                 <StatTile label="Pending" value={String(totalSlotsPending)} />
@@ -86,9 +87,7 @@ export default function StatsScreen() {
             </View>
 
             <View style={styles.section}>
-              <ThemedText type="subtitle" style={styles.sectionTitle}>
-                Daily Breakdown
-              </ThemedText>
+              <SectionLabel>Daily Breakdown</SectionLabel>
               {monthMeals.length === 0 ? (
                 <ThemedText>No meals logged this month yet.</ThemedText>
               ) : (
@@ -98,7 +97,7 @@ export default function StatsScreen() {
                       <ThemedText style={styles.dayLabel}>
                         {formatDisplayDate(meal.date)}
                       </ThemedText>
-                      <ThemedText style={styles.daySlots}>
+                      <ThemedText style={[styles.daySlots, { color: palette.textMuted }]}>
                         {[
                           meal.breakfast && "Breakfast",
                           meal.lunch && "Lunch",
@@ -124,27 +123,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 24,
-  },
-  header: {
-    gap: 4,
-  },
-  month: {
-    fontSize: 16,
+    gap: Spacing.xxl,
   },
   section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
+    gap: Spacing.md,
   },
   summaryCard: {
     flexDirection: "row",
   },
   dayList: {
-    gap: 10,
+    gap: Spacing.sm + 2,
   },
   dayCard: {
     gap: 4,
@@ -155,9 +145,5 @@ const styles = StyleSheet.create({
   },
   daySlots: {
     fontSize: 14,
-    opacity: 0.7,
-  },
-  error: {
-    color: "#DC2626",
   },
 });

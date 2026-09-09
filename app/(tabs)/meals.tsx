@@ -9,6 +9,9 @@ import { Card } from "@/components/ui/card";
 import { ErrorView } from "@/components/ui/error-view";
 import { LoadingView } from "@/components/ui/loading-view";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
+import { ScreenHeader, SectionLabel } from "@/components/ui/screen-header";
+import { Colors, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { deleteMeal, getMeals, updateMeal } from "@/services/meals-api";
 import type { Meal } from "@/types/meal";
 import { confirmDelete } from "@/utils/confirm";
@@ -51,6 +54,9 @@ function DayMealsCard({
   onDeletePress,
   isDeleting,
 }: DayMealsCardProps) {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
+
   return (
     <Card style={styles.dayCard}>
       <View style={styles.dayCardHeader}>
@@ -58,12 +64,14 @@ function DayMealsCard({
         <View style={styles.dayCardActions}>
           {onEditPress ? (
             <Pressable onPress={onEditPress} disabled={isDeleting}>
-              <ThemedText style={styles.editText}>Edit</ThemedText>
+              <ThemedText style={[styles.editText, { color: palette.tint }]}>
+                Edit
+              </ThemedText>
             </Pressable>
           ) : null}
           {onDeletePress ? (
             <Pressable onPress={onDeletePress} disabled={isDeleting}>
-              <ThemedText style={styles.deleteText}>
+              <ThemedText style={[styles.deleteText, { color: palette.danger }]}>
                 {isDeleting ? "Deleting..." : "Delete"}
               </ThemedText>
             </Pressable>
@@ -164,19 +172,23 @@ export default function MealsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Meals</ThemedText>
-          <ThemedText style={styles.month}>{getCurrentMonthLabel()}</ThemedText>
+        <ScreenHeader title="Meals" subtitle={getCurrentMonthLabel()} />
+
+        <View style={styles.buttonRow}>
+          <View style={styles.buttonFlex}>
+            <Button title="Add Meal" onPress={() => router.push("/add-meal")} />
+          </View>
+          <View style={styles.buttonFlex}>
+            <Button
+              title="View Stats"
+              variant="secondary"
+              onPress={() => router.push("/stats")}
+            />
+          </View>
         </View>
 
-        <Button title="Add Meal" onPress={() => router.push("/add-meal")} />
-
-        <Button title="View Stats" onPress={() => router.push("/stats")} />
-
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Today&apos;s Meal Status
-          </ThemedText>
+          <SectionLabel>Today&apos;s Meal Status</SectionLabel>
           {isLoading ? (
             <LoadingView label="Loading meals..." />
           ) : todaysMeal ? (
@@ -190,9 +202,7 @@ export default function MealsScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Recent Meals
-          </ThemedText>
+          <SectionLabel>Recent Meals</SectionLabel>
           {isLoading ? (
             <LoadingView label="Loading meals..." />
           ) : error ? (
@@ -238,24 +248,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 24,
+    gap: Spacing.xxl,
   },
-  header: {
-    gap: 4,
+  buttonRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
   },
-  month: {
-    fontSize: 16,
+  buttonFlex: {
+    flex: 1,
   },
   section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
+    gap: Spacing.md,
   },
   recentList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   dayCard: {
     gap: 2,
@@ -275,14 +283,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   editText: {
-    color: "#2563EB",
     fontSize: 14,
+    fontWeight: "600",
   },
   deleteText: {
-    color: "#DC2626",
     fontSize: 14,
-  },
-  error: {
-    color: "#DC2626",
+    fontWeight: "600",
   },
 });

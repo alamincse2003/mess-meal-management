@@ -1,22 +1,60 @@
+import { useState } from "react";
 import { StyleSheet, TextInput, View, type TextInputProps } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { Colors, Radius } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
 }
 
-export function Input({ label, error, style, ...rest }: InputProps) {
+export function Input({ label, error, style, onFocus, onBlur, ...rest }: InputProps) {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
+  const [isFocused, setIsFocused] = useState(false);
+
+  const borderColor = error
+    ? palette.danger
+    : isFocused
+      ? palette.tint
+      : palette.border;
+
   return (
     <View style={styles.container}>
-      {label ? <ThemedText style={styles.label}>{label}</ThemedText> : null}
+      {label ? (
+        <ThemedText style={[styles.label, { color: palette.textMuted }]}>
+          {label}
+        </ThemedText>
+      ) : null}
       <TextInput
-        style={[styles.input, error ? styles.inputError : undefined, style]}
-        placeholderTextColor="#9CA3AF"
+        style={[
+          styles.input,
+          {
+            borderColor,
+            borderWidth: isFocused || error ? 1.5 : 1,
+            backgroundColor: palette.surface,
+            color: palette.text,
+          },
+          style,
+        ]}
+        placeholderTextColor={palette.textMuted}
+        onFocus={(e) => {
+          setIsFocused(true);
+          onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setIsFocused(false);
+          onBlur?.(e);
+        }}
         {...rest}
       />
-      {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+      {error ? (
+        <ThemedText style={[styles.error, { color: palette.danger }]}>
+          {error}
+        </ThemedText>
+      ) : null}
     </View>
   );
 }
@@ -27,19 +65,17 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 6,
+    fontSize: 13,
+    fontWeight: "600",
   },
   input: {
     height: 52,
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 10,
+    borderRadius: Radius.md,
     paddingHorizontal: 16,
-  },
-  inputError: {
-    borderColor: "#DC2626",
+    fontSize: 15,
   },
   error: {
     marginTop: 6,
-    color: "#DC2626",
+    fontSize: 13,
   },
 });

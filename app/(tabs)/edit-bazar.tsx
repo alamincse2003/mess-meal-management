@@ -1,15 +1,20 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { Colors, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { updateBazarEntry } from "@/services/bazar-api";
 import { formatDisplayDate } from "@/utils/date";
 
 export default function EditBazarScreen() {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
   const params = useLocalSearchParams<{
     id: string;
     date: string;
@@ -62,12 +67,10 @@ export default function EditBazarScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Edit Bazar</ThemedText>
-          <ThemedText style={styles.date}>
-            {formatDisplayDate(params.date)}
-          </ThemedText>
-        </View>
+        <ScreenHeader
+          title="Edit Bazar"
+          subtitle={formatDisplayDate(params.date)}
+        />
 
         <Input
           label="Amount"
@@ -84,7 +87,11 @@ export default function EditBazarScreen() {
           onChangeText={setDescription}
         />
 
-        {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+        {error ? (
+          <ThemedText style={[styles.error, { color: palette.danger }]}>
+            {error}
+          </ThemedText>
+        ) : null}
 
         <Button
           title={isSubmitting ? "Saving..." : "Save Bazar Entry"}
@@ -101,18 +108,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 16,
-  },
-  header: {
-    gap: 4,
-    marginBottom: 8,
-  },
-  date: {
-    fontSize: 16,
+    gap: Spacing.lg,
   },
   error: {
-    color: "#DC2626",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });

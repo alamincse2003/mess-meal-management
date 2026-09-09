@@ -1,12 +1,15 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
+import { ScreenHeader } from "@/components/ui/screen-header";
+import { Colors, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { MealSlot } from "@/app/(tabs)/meals";
 import { updateMeal } from "@/services/meals-api";
 import { formatDisplayDate } from "@/utils/date";
@@ -23,6 +26,8 @@ function toStatus(served: boolean): MealStatus {
 }
 
 export default function EditMealScreen() {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
   const params = useLocalSearchParams<{
     id: string;
     date: string;
@@ -83,10 +88,7 @@ export default function EditMealScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Edit Meal</ThemedText>
-          <ThemedText style={styles.date}>{formatDisplayDate(form.date)}</ThemedText>
-        </View>
+        <ScreenHeader title="Edit Meal" subtitle={formatDisplayDate(form.date)} />
 
         <Card style={styles.card}>
           <MealStatusRow
@@ -106,7 +108,11 @@ export default function EditMealScreen() {
           />
         </Card>
 
-        {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+        {error ? (
+          <ThemedText style={[styles.error, { color: palette.danger }]}>
+            {error}
+          </ThemedText>
+        ) : null}
 
         <Button
           title={isSubmitting ? "Saving..." : "Save Meal"}
@@ -123,20 +129,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 24,
-  },
-  header: {
-    gap: 4,
-  },
-  date: {
-    fontSize: 16,
+    gap: Spacing.xxl,
   },
   card: {
     gap: 2,
   },
   error: {
-    color: "#DC2626",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });

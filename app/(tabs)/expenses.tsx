@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorView } from "@/components/ui/error-view";
 import { LoadingView } from "@/components/ui/loading-view";
+import { ScreenHeader, SectionLabel } from "@/components/ui/screen-header";
+import { Colors, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { deleteExpense, getExpenses } from "@/services/expenses-api";
 import type { Expense } from "@/types/expense";
 import { confirmDelete } from "@/utils/confirm";
@@ -30,6 +33,9 @@ function ExpenseCard({
   onDeletePress,
   isDeleting,
 }: ExpenseCardProps) {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
+
   return (
     <Card style={styles.entryCard}>
       <View style={styles.entryHeader}>
@@ -38,21 +44,25 @@ function ExpenseCard({
         </ThemedText>
         <View style={styles.entryActions}>
           <Pressable onPress={onEditPress} disabled={isDeleting}>
-            <ThemedText style={styles.editText}>Edit</ThemedText>
+            <ThemedText style={[styles.editText, { color: palette.tint }]}>
+              Edit
+            </ThemedText>
           </Pressable>
           <Pressable onPress={onDeletePress} disabled={isDeleting}>
-            <ThemedText style={styles.deleteText}>
+            <ThemedText style={[styles.deleteText, { color: palette.danger }]}>
               {isDeleting ? "Deleting..." : "Delete"}
             </ThemedText>
           </Pressable>
         </View>
       </View>
-      <ThemedText style={styles.entryCategory}>{expense.category}</ThemedText>
+      <ThemedText style={[styles.entryCategory, { color: palette.textMuted }]}>
+        {expense.category}
+      </ThemedText>
       <ThemedText style={styles.entryAmount}>
         {formatAmount(expense.amount)}
       </ThemedText>
       {expense.description ? (
-        <ThemedText style={styles.entryDescription}>
+        <ThemedText style={[styles.entryDescription, { color: palette.textMuted }]}>
           {expense.description}
         </ThemedText>
       ) : null}
@@ -115,10 +125,7 @@ export default function ExpensesScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Expenses</ThemedText>
-          <ThemedText style={styles.month}>{getCurrentMonthLabel()}</ThemedText>
-        </View>
+        <ScreenHeader title="Expenses" subtitle={getCurrentMonthLabel()} />
 
         <Button
           title="Add Expense"
@@ -126,9 +133,7 @@ export default function ExpensesScreen() {
         />
 
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            All Expenses
-          </ThemedText>
+          <SectionLabel>All Expenses</SectionLabel>
           {isLoading ? (
             <LoadingView label="Loading expenses..." />
           ) : error ? (
@@ -179,28 +184,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 24,
-  },
-  header: {
-    gap: 4,
-  },
-  month: {
-    fontSize: 16,
+    gap: Spacing.xxl,
   },
   section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
+    gap: Spacing.md,
   },
   total: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   entryList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   entryCard: {
     gap: 4,
@@ -221,7 +217,6 @@ const styles = StyleSheet.create({
   entryCategory: {
     fontSize: 14,
     fontWeight: "600",
-    opacity: 0.8,
   },
   entryAmount: {
     fontSize: 20,
@@ -229,17 +224,13 @@ const styles = StyleSheet.create({
   },
   entryDescription: {
     fontSize: 14,
-    opacity: 0.7,
   },
   editText: {
-    color: "#2563EB",
     fontSize: 14,
+    fontWeight: "600",
   },
   deleteText: {
-    color: "#DC2626",
     fontSize: 14,
-  },
-  error: {
-    color: "#DC2626",
+    fontWeight: "600",
   },
 });

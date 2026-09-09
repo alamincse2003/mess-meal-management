@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -10,7 +10,9 @@ import { ErrorView } from "@/components/ui/error-view";
 import { LoadingView } from "@/components/ui/loading-view";
 import { MealStatusRow, type MealStatus } from "@/components/ui/meal-status-row";
 import { StatTile } from "@/components/ui/stat-tile";
+import { Colors, Radius, Shadow, Spacing } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { getBazarEntries } from "@/services/bazar-api";
 import { getExpenses } from "@/services/expenses-api";
 import { getMealSummary, getMeals } from "@/services/meals-api";
@@ -47,7 +49,9 @@ const QUICK_ACTIONS: {
 ];
 
 export default function HomeScreen() {
-  const { signOut, user } = useAuth();
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
+  const { user } = useAuth();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [bazarEntries, setBazarEntries] = useState<BazarEntry[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -114,23 +118,34 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <ThemedText style={styles.greeting}>
-            Good morning{user ? `, ${user.name}` : ""} 👋
-          </ThemedText>
-          <ThemedText type="title">MessMate</ThemedText>
+          <View style={styles.headerText}>
+            <ThemedText style={[styles.greeting, { color: palette.textMuted }]}>
+              Good morning{user ? `, ${user.name}` : ""} 👋
+            </ThemedText>
+            <ThemedText type="title">MessMate</ThemedText>
+          </View>
+          <Pressable
+            onPress={() => router.push("/account")}
+            style={[styles.avatar, { backgroundColor: palette.tint }]}
+          >
+            <ThemedText style={styles.avatarText}>
+              {user ? user.name.charAt(0).toUpperCase() : "?"}
+            </ThemedText>
+          </Pressable>
         </View>
-
-        <Button title="Account" onPress={() => router.push("/account")} />
-
-        <Button title="Log out" onPress={signOut} />
 
         {error ? (
           <ErrorView message={error} onRetry={loadDashboardData} />
         ) : null}
 
         {!isLoading && !todaysMeal ? (
-          <Card style={styles.reminderCard}>
-            <ThemedText style={styles.reminderText}>
+          <Card
+            style={[
+              styles.reminderCard,
+              { backgroundColor: palette.warningSurface, borderColor: "transparent" },
+            ]}
+          >
+            <ThemedText style={[styles.reminderText, { color: palette.warning }]}>
               You haven&apos;t logged today&apos;s meals yet.
             </ThemedText>
             <Button
@@ -141,8 +156,8 @@ export default function HomeScreen() {
         ) : null}
 
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Today&apos;s Meals
+          <ThemedText style={[styles.sectionTitle, { color: palette.textMuted }]}>
+            TODAY&apos;S MEALS
           </ThemedText>
           <Card>
             {isLoading ? (
@@ -169,8 +184,8 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Monthly Summary
+          <ThemedText style={[styles.sectionTitle, { color: palette.textMuted }]}>
+            MONTHLY SUMMARY
           </ThemedText>
           <Card style={styles.summaryCard}>
             <StatTile
@@ -189,22 +204,32 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Quick Actions
+          <ThemedText style={[styles.sectionTitle, { color: palette.textMuted }]}>
+            QUICK ACTIONS
           </ThemedText>
           <View style={styles.actionsGrid}>
             {QUICK_ACTIONS.map((action) => (
-              <View key={action.label} style={styles.actionItem}>
-                <Button
-                  title={action.href ? action.label : `${action.label} (soon)`}
-                  disabled={!action.href}
-                  onPress={() => {
-                    if (action.href) {
-                      router.push(action.href);
-                    }
-                  }}
-                />
-              </View>
+              <Pressable
+                key={action.label}
+                disabled={!action.href}
+                onPress={() => {
+                  if (action.href) {
+                    router.push(action.href);
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.actionItem,
+                  {
+                    backgroundColor: palette.surface,
+                    borderColor: palette.border,
+                    opacity: !action.href ? 0.5 : pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <ThemedText style={styles.actionLabel}>
+                  {action.label}
+                </ThemedText>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -218,39 +243,68 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 24,
+    gap: Spacing.xxl,
   },
   header: {
-    gap: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerText: {
+    gap: 2,
   },
   greeting: {
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: Radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "700",
   },
   section: {
-    gap: 12,
+    gap: Spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.6,
   },
   summaryCard: {
     flexDirection: "row",
   },
   reminderCard: {
-    gap: 12,
-    borderColor: "#F59E0B",
-    borderWidth: 1,
+    gap: Spacing.md,
   },
   reminderText: {
     fontSize: 14,
+    fontWeight: "600",
   },
   actionsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    gap: Spacing.md,
   },
   actionItem: {
     width: "47%",
+    height: 64,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    ...Shadow.card,
+  },
+  actionLabel: {
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

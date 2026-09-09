@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorView } from "@/components/ui/error-view";
 import { LoadingView } from "@/components/ui/loading-view";
+import { ScreenHeader, SectionLabel } from "@/components/ui/screen-header";
+import { Colors, Spacing } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { deleteBazarEntry, getBazarEntries } from "@/services/bazar-api";
 import type { BazarEntry } from "@/types/bazar";
 import { confirmDelete } from "@/utils/confirm";
@@ -30,6 +33,9 @@ function BazarEntryCard({
   onDeletePress,
   isDeleting,
 }: BazarEntryCardProps) {
+  const colorScheme = useColorScheme() ?? "light";
+  const palette = Colors[colorScheme];
+
   return (
     <Card style={styles.entryCard}>
       <View style={styles.entryHeader}>
@@ -38,10 +44,12 @@ function BazarEntryCard({
         </ThemedText>
         <View style={styles.entryActions}>
           <Pressable onPress={onEditPress} disabled={isDeleting}>
-            <ThemedText style={styles.editText}>Edit</ThemedText>
+            <ThemedText style={[styles.editText, { color: palette.tint }]}>
+              Edit
+            </ThemedText>
           </Pressable>
           <Pressable onPress={onDeletePress} disabled={isDeleting}>
-            <ThemedText style={styles.deleteText}>
+            <ThemedText style={[styles.deleteText, { color: palette.danger }]}>
               {isDeleting ? "Deleting..." : "Delete"}
             </ThemedText>
           </Pressable>
@@ -51,7 +59,7 @@ function BazarEntryCard({
         {formatAmount(entry.amount)}
       </ThemedText>
       {entry.description ? (
-        <ThemedText style={styles.entryDescription}>
+        <ThemedText style={[styles.entryDescription, { color: palette.textMuted }]}>
           {entry.description}
         </ThemedText>
       ) : null}
@@ -107,17 +115,12 @@ export default function BazarScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <ThemedText type="title">Bazar</ThemedText>
-          <ThemedText style={styles.month}>{getCurrentMonthLabel()}</ThemedText>
-        </View>
+        <ScreenHeader title="Bazar" subtitle={getCurrentMonthLabel()} />
 
         <Button title="Add Bazar" onPress={() => router.push("/add-bazar")} />
 
         <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            All Entries
-          </ThemedText>
+          <SectionLabel>All Entries</SectionLabel>
           {isLoading ? (
             <LoadingView label="Loading bazar entries..." />
           ) : error ? (
@@ -167,28 +170,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 40,
-    gap: 24,
-  },
-  header: {
-    gap: 4,
-  },
-  month: {
-    fontSize: 16,
+    gap: Spacing.xxl,
   },
   section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
+    gap: Spacing.md,
   },
   total: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   entryList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   entryCard: {
     gap: 4,
@@ -212,17 +206,13 @@ const styles = StyleSheet.create({
   },
   entryDescription: {
     fontSize: 14,
-    opacity: 0.7,
   },
   editText: {
-    color: "#2563EB",
     fontSize: 14,
+    fontWeight: "600",
   },
   deleteText: {
-    color: "#DC2626",
     fontSize: 14,
-  },
-  error: {
-    color: "#DC2626",
+    fontWeight: "600",
   },
 });
